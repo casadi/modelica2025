@@ -33,17 +33,17 @@ x_traj = {xk};       % Place to store the state solution trajectory
 u_traj = {};
 for k=1:N % Loop over integration intervals
 
-    % Decision variables for helper states at each collocation point
+    % Value of the states at each collocation point
     Xc = opti.variable(nx, degree);
 
     % Decision variables for control (constant over interval)
     uk = opti.variable(nu);
     
-    % Slope of polynomial at collocation points
+    % Value of the state derivatives at each collocation point
     Z  = [xk Xc];
     Pidot = (Z * C)/dt;
 
-    % Collocation constraints (slope matching with dynamics)
+    % Collocation constraints
     opti.subject_to(Pidot==getfield(f('x',Xc,'u',uk),'ode'));
     
     % Continuity constraints

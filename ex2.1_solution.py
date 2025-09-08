@@ -12,7 +12,7 @@ dt = T/N    # Length of one interval
 
 nx = dae.nx() # Number of states
 
-xvar = dae.x()
+xvar = dae.x()  # Names of the states
 
 # Numeric coefficient matrices for collocation
 degree = 3
@@ -22,19 +22,19 @@ tau = ca.collocation_points(degree,method)
 
 opti = ca.Opti() # Opti context
 
-xk = ca.MX(x0)
+xk = ca.MX(x0)  # Initial state (will be overwitten below)
 
 x_traj = [xk]       # Place to store the state solution trajectory
 for k in range(N): # Loop over integration intervals
 
-    # Decision variables for helper states at each collocation point
+    # Value of the states at each collocation point
     Xc = opti.variable(nx, degree)
     
-    # Slope of polynomial at collocation points
+    # Value of the state derivatives at each collocation point
     Z  = ca.horzcat(xk,Xc)
     Pidot = (Z @ C)/dt
 
-    # Collocation constraints (slope matching with dynamics)
+    # Collocation constraints
     opti.subject_to(Pidot==f(x=Xc)["ode"])
     
     # Continuity constraints
@@ -82,5 +82,9 @@ plt.plot(p[0,:].T,p[1,:].T,'b')
 plt.axis('equal')
 
 # plt.savefig('resources/car_2.1.pdf')
+
+plt.figure()
+
+plt.spy(sol.value(ca.jacobian(opti.g,opti.x)))
 
 plt.show()

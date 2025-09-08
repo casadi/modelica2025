@@ -20,19 +20,19 @@ tau = casadi.collocation_points(degree,method);
 
 opti = casadi.Opti(); % Opti context
 
-xk = casadi.MX(x0);
+xk = casadi.MX(x0);  % Initial state (will be overwitten below)
 
 x_traj = {xk};       % Place to store the state solution trajectory
 for k=1:N % Loop over integration intervals
 
-    % Decision variables for helper states at each collocation point
+    % Value of the states at each collocation point
     Xc = opti.variable(nx, degree);
     
-    % Slope of polynomial at collocation points
+    % Value of the state derivatives at each collocation point
     Z  = [xk Xc];
     Pidot = (Z * C)/dt;
 
-    % Collocation constraints (slope matching with dynamics)
+    % Collocation constraints
     opti.subject_to(Pidot==getfield(f('x',Xc),'ode'));
     
     % Continuity constraints
@@ -82,3 +82,7 @@ plot(p_L(1,:).', p_L(2,:).', 'r',   'LineWidth', 1.2);
 plot(p_R(1,:).', p_R(2,:).', 'r',   'LineWidth', 1.2);
 plot(p(1,:).',   p(2,:).',   'b',   'LineWidth', 1.4);
 axis equal;
+
+figure
+spy(sol.value(jacobian(opti.g,opti.x)));
+
